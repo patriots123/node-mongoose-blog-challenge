@@ -3,25 +3,19 @@
 const express = require("express");
 const mongoose = require("mongoose");
 
-// Mongoose internally uses a promise-like object,
-// but its better to make Mongoose use built in es6 promises
 mongoose.Promise = global.Promise;
 
-// config.js is where we control constants for entire
-// app like PORT and DATABASE_URL
 const {PORT, DATABASE_URL} = require("./config");
 const {BlogPost} = require("./models");
 
 const app = express();
 app.use(express.json());
 
-// GET requests to /restaurants => return 10 restaurants
+//get all blog posts
 app.get("/blog-posts", (req, res) => {
     BlogPost.find()
     .then(blogPosts => {
-      res.json({
-        blogPosts: blogPosts.map(blogPost => blogPost.serialize())
-      });
+      res.json(blogPosts.map(blogPost => blogPost.serialize()));
     })
     .catch(err => {
       console.error(err);
@@ -29,7 +23,7 @@ app.get("/blog-posts", (req, res) => {
     });
 });
 
-// can also request by ID
+//get blog post by ID
 app.get("/blog-posts/:id", (req, res) => {
     BlogPost
     .findById(req.params.id)
@@ -41,7 +35,7 @@ app.get("/blog-posts/:id", (req, res) => {
 });
 
 app.post("/blog-posts", (req, res) => {
-  const requiredFields = ["title", "content", "author", "publishDate"];
+  const requiredFields = ["title", "content", "author"];
   for (let i = 0; i < requiredFields.length; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
@@ -53,9 +47,11 @@ app.post("/blog-posts", (req, res) => {
 
   BlogPost.create({
     title: req.body.title,
-    author: req.body.author,
-    content: req.body.content
-
+    content: req.body.content,
+    author: {
+        firstName: req.body.author.firstName,
+        lastName: req.body.author.lastName
+    }
   })
     .then(blogPost => res.status(201).json(blogPost.serialize()))
     .catch(err => {
