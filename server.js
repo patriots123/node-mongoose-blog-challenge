@@ -34,6 +34,7 @@ app.get("/blog-posts/:id", (req, res) => {
     });
 });
 
+//create blog post
 app.post("/blog-posts", (req, res) => {
   const requiredFields = ["title", "content", "author"];
   for (let i = 0; i < requiredFields.length; i++) {
@@ -48,10 +49,7 @@ app.post("/blog-posts", (req, res) => {
   BlogPost.create({
     title: req.body.title,
     content: req.body.content,
-    author: {
-        firstName: req.body.author.firstName,
-        lastName: req.body.author.lastName
-    }
+    author: req.body.author
   })
     .then(blogPost => res.status(201).json(blogPost.serialize()))
     .catch(err => {
@@ -60,6 +58,7 @@ app.post("/blog-posts", (req, res) => {
     });
 });
 
+//update blog post by ID
 app.put("/blog-posts/:id", (req, res) => {
   if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
     const message =
@@ -85,6 +84,7 @@ app.put("/blog-posts/:id", (req, res) => {
     .catch(err => res.status(500).json({ message: "Internal server error" }));
 });
 
+//delete blog post by ID
 app.delete("/blog-posts/:id", (req, res) => {
     BlogPost.findByIdAndRemove(req.params.id)
     .then(restaurant => res.status(204).end())
